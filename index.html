@@ -13,14 +13,13 @@
     }
     .wheel-container {
       position: relative;
-      width: 400px;
-      height: 400px;
+      width: 400px; /* Больше колесо */
+      height: 400px; /* Больше колесо */
       margin: 30px auto;
-      display: flex; /* Flexbox для размещения колеса и полей ввода рядом */
     }
     .wheel {
       border-radius: 50%;
-      transition: transform 4s cubic-bezier(0.33, 1, 0.68, 1);
+      transition: transform cubic-bezier(0.33, 1, 0.68, 1); /* Уберем указание времени из transition, будем задавать в JS*/
     }
     .arrow {
       position: absolute;
@@ -33,33 +32,11 @@
       border-right: 15px solid transparent;
       border-top: 20px solid red;
     }
-    .sectors-input {
-      margin-left: 20px; /* Отступ между колесом и полями */
-      text-align: left; /* Выравниваем текст в полях слева */
-    }
-    .sector-row {
-      display: flex;
-      align-items: center;
-      margin-bottom: 5px;
-    }
-    .sector-row input[type="text"] {
+    input[type="text"] {
       padding: 6px;
+      width: 300px;
       border-radius: 5px;
       border: none;
-      width: 150px; /* Меньше ширина, чтобы поместилось все */
-      margin-right: 5px;
-    }
-    .add-sector {
-      padding: 5px 10px;
-      border: none;
-      background-color: #28a745;
-      color: white;
-      font-size: 14px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .add-sector:hover {
-      background-color: #218838;
     }
     button {
       padding: 10px 20px;
@@ -74,6 +51,14 @@
     button:hover {
       background-color: #218838;
     }
+
+    /* Добавляем стили для кнопок выбора времени */
+    .time-buttons {
+      margin-top: 20px;
+    }
+    .time-buttons button {
+      margin: 0 5px;
+    }
   </style>
 </head>
 <body>
@@ -81,24 +66,20 @@
   <div class="wheel-container">
     <div class="arrow"></div>
     <canvas id="wheel" class="wheel" width="400" height="400"></canvas>
-
-    <div class="sectors-input">
-      <div id="sectorInputs">
-        <div class="sector-row">
-          <label>Ячейка 1:</label>
-          <input type="text" value="Приз">
-        </div>
-        <div class="sector-row">
-          <label>Ячейка 2:</label>
-          <input type="text" value="Пусто">
-        </div>
-      </div>
-      <button class="add-sector" onclick="addSector()">+</button>
-      <button onclick="updateSectors()">Обновить</button>
-    </div>
   </div>
 
-  <button onclick="spinWheel()">Крутить!</button>
+  <form id="sectorsForm" onsubmit="event.preventDefault(); updateSectors();">
+    <label for="input">Названия ячеек (через пробел):</label><br>
+    <input id="input" type="text" value="Приз Пусто Сюрприз Удача Опять пусто Джекпот">
+    <br><button type="submit">Обновить</button>
+  </form>
+
+  <div class="time-buttons">
+    <button onclick="spinWheel(5, 5)">Крутить 5 сек</button>
+    <button onclick="spinWheel(10, 8)">Крутить 10 сек</button>
+    <button onclick="spinWheel(30, 15)">Крутить 30 сек</button>
+    <button onclick="spinWheel(60, 25)">Крутить 1 мин</button>
+  </div>
 
   <script>
     const wheel = document.getElementById("wheel");
@@ -106,57 +87,47 @@
     const colors = ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40"];
     let currentAngle = 0;
     let sectors = [];
-    let sectorCount = 2; // Начинаем с двух ячеек
 
     function drawWheel() {
-      ctx.clearRect(0, 0, 400, 400);
+      ctx.clearRect(0, 0, 400, 400); // Учитываем новый размер
       const anglePerSector = (2 * Math.PI) / sectors.length;
       for (let i = 0; i < sectors.length; i++) {
         ctx.beginPath();
-        ctx.moveTo(200, 200);
-        ctx.arc(200, 200, 200, i * anglePerSector, (i + 1) * anglePerSector);
+        ctx.moveTo(200, 200); // Учитываем новый размер
+        ctx.arc(200, 200, 200, i * anglePerSector, (i + 1) * anglePerSector); // Учитываем новый размер
         ctx.fillStyle = colors[i % colors.length];
         ctx.fill();
         ctx.save();
-        ctx.translate(200, 200);
+        ctx.translate(200, 200); // Учитываем новый размер
         ctx.rotate(i * anglePerSector + anglePerSector / 2);
         ctx.textAlign = "right";
         ctx.fillStyle = "#fff";
         ctx.font = "bold 16px sans-serif";
-        ctx.fillText(sectors[i], 190, 10);
+        ctx.fillText(sectors[i], 190, 10); // Подгоняем позицию текста
         ctx.restore();
       }
     }
 
     function updateSectors() {
-      sectors = [];
-      const sectorInputs = document.querySelectorAll('#sectorInputs input[type="text"]');
-      sectorInputs.forEach(input => {
-        sectors.push(input.value.trim());
-      });
-      sectors = sectors.filter(s => s.length > 0); // Убираем пустые значения
+      const input = document.getElementById("input").value;
+      sectors = input.split(" ").map(s => s.trim()).filter(s => s.length > 0);
       drawWheel();
     }
 
-    function addSector() {
-      sectorCount++;
-      const sectorInputsDiv = document.getElementById("sectorInputs");
-      const newSectorRow = document.createElement("div");
-      newSectorRow.className = "sector-row";
-      newSectorRow.innerHTML = `
-        <label>Ячейка ${sectorCount}:</label>
-        <input type="text" value="">
-      `;
-      sectorInputsDiv.appendChild(newSectorRow);
-    }
-
-    function spinWheel() {
-      const spinAngle = Math.floor(Math.random() * 360 + 720);
+    function spinWheel(duration, revolutions) { // duration в секундах, revolutions - количество оборотов
+      const spinAngle = 360 * revolutions + Math.floor(Math.random() * 360);  // Больше оборотов + случайный угол
       currentAngle += spinAngle;
+
+      wheel.style.transition = `transform ${duration}s cubic-bezier(0.33, 1, 0.68, 1)`; // Задаем время transition
+
       wheel.style.transform = `rotate(${currentAngle}deg)`;
+
+      // Сбрасываем transition после окончания вращения, чтобы следующие вращения работали корректно
+      setTimeout(() => {
+        wheel.style.transition = '';
+      }, duration * 1000);
     }
 
-    // Инициализация: сразу рисуем колесо с двумя секторами по умолчанию
     updateSectors();
   </script>
 </body>
