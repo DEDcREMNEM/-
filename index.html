@@ -61,8 +61,8 @@
   </div>
 
   <form id="sectorsForm" onsubmit="event.preventDefault(); updateSectors();">
-    <label for="input">Названия ячеек (через запятую):</label><br>
-    <input id="input" type="text" value="Приз,Пусто,Сюрприз,Удача,Опять пусто,Джекпот">
+    <label for="input">Названия ячеек (через пробел):</label><br>
+    <input id="input" type="text" value="Приз Пусто Сюрприз Удача Опять пусто Джекпот">
     <br><button type="submit">Обновить</button>
   </form>
 
@@ -97,7 +97,7 @@
 
     function updateSectors() {
       const input = document.getElementById("input").value;
-      sectors = input.split(",").map(s => s.trim()).filter(s => s.length > 0);
+      sectors = input.split(" ").map(s => s.trim()).filter(s => s.length > 0);
       drawWheel();
     }
 
