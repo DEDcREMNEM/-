@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Колесо</title>
+  <title>Колесо Фортуны</title>
   <style>
     body {
       font-family: sans-serif;
@@ -13,13 +13,13 @@
     }
     .wheel-container {
       position: relative;
-      width: 300px;
-      height: 300px;
+      width: 400px; /* Больше колесо */
+      height: 400px; /* Больше колесо */
       margin: 30px auto;
     }
     .wheel {
       border-radius: 50%;
-      transition: transform 4s cubic-bezier(0.33, 1, 0.68, 1);
+      transition: transform cubic-bezier(0.33, 1, 0.68, 1); /* Уберем указание времени из transition, будем задавать в JS*/
     }
     .arrow {
       position: absolute;
@@ -51,13 +51,21 @@
     button:hover {
       background-color: #218838;
     }
+
+    /* Добавляем стили для кнопок выбора времени */
+    .time-buttons {
+      margin-top: 20px;
+    }
+    .time-buttons button {
+      margin: 0 5px;
+    }
   </style>
 </head>
 <body>
-  <h1>Колесо</h1>
+  <h1>Колесо Фортуны</h1>
   <div class="wheel-container">
     <div class="arrow"></div>
-    <canvas id="wheel" class="wheel" width="300" height="300"></canvas>
+    <canvas id="wheel" class="wheel" width="400" height="400"></canvas>
   </div>
 
   <form id="sectorsForm" onsubmit="event.preventDefault(); updateSectors();">
@@ -66,7 +74,12 @@
     <br><button type="submit">Обновить</button>
   </form>
 
-  <button onclick="spinWheel()">Крутить</button>
+  <div class="time-buttons">
+    <button onclick="spinWheel(5)">Крутить 5 сек</button>
+    <button onclick="spinWheel(10)">Крутить 10 сек</button>
+    <button onclick="spinWheel(30)">Крутить 30 сек</button>
+    <button onclick="spinWheel(60)">Крутить 1 мин</button>
+  </div>
 
   <script>
     const wheel = document.getElementById("wheel");
@@ -76,21 +89,21 @@
     let sectors = [];
 
     function drawWheel() {
-      ctx.clearRect(0, 0, 300, 300);
+      ctx.clearRect(0, 0, 400, 400); // Учитываем новый размер
       const anglePerSector = (2 * Math.PI) / sectors.length;
       for (let i = 0; i < sectors.length; i++) {
         ctx.beginPath();
-        ctx.moveTo(150, 150);
-        ctx.arc(150, 150, 150, i * anglePerSector, (i + 1) * anglePerSector);
+        ctx.moveTo(200, 200); // Учитываем новый размер
+        ctx.arc(200, 200, 200, i * anglePerSector, (i + 1) * anglePerSector); // Учитываем новый размер
         ctx.fillStyle = colors[i % colors.length];
         ctx.fill();
         ctx.save();
-        ctx.translate(150, 150);
+        ctx.translate(200, 200); // Учитываем новый размер
         ctx.rotate(i * anglePerSector + anglePerSector / 2);
         ctx.textAlign = "right";
         ctx.fillStyle = "#fff";
         ctx.font = "bold 16px sans-serif";
-        ctx.fillText(sectors[i], 140, 10);
+        ctx.fillText(sectors[i], 190, 10); // Подгоняем позицию текста
         ctx.restore();
       }
     }
@@ -101,10 +114,18 @@
       drawWheel();
     }
 
-    function spinWheel() {
-      const spinAngle = Math.floor(Math.random() * 360 + 720);
+    function spinWheel(duration) { // duration в секундах
+      const spinAngle = Math.floor(Math.random() * 360 + 720); // Произвольный угол вращения
       currentAngle += spinAngle;
+
+      wheel.style.transition = `transform ${duration}s cubic-bezier(0.33, 1, 0.68, 1)`; // Задаем время transition
+
       wheel.style.transform = `rotate(${currentAngle}deg)`;
+
+      // Сбрасываем transition после окончания вращения, чтобы следующие вращения работали корректно
+      setTimeout(() => {
+        wheel.style.transition = '';
+      }, duration * 1000);
     }
 
     updateSectors();
