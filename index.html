@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Колесо Фортуны</title>
+  <title>Колесо</title>
   <style>
     body {
       font-family: sans-serif;
@@ -13,13 +13,13 @@
     }
     .wheel-container {
       position: relative;
-      width: 400px; /* Больше колесо */
-      height: 400px; /* Больше колесо */
+      width: 300px;
+      height: 300px;
       margin: 30px auto;
     }
     .wheel {
       border-radius: 50%;
-      transition: transform cubic-bezier(0.33, 1, 0.68, 1); /* Уберем указание времени из transition, будем задавать в JS*/
+      transition: transform 4s cubic-bezier(0.33, 1, 0.68, 1);
     }
     .arrow {
       position: absolute;
@@ -51,21 +51,13 @@
     button:hover {
       background-color: #218838;
     }
-
-    /* Добавляем стили для кнопок выбора времени */
-    .time-buttons {
-      margin-top: 20px;
-    }
-    .time-buttons button {
-      margin: 0 5px;
-    }
   </style>
 </head>
 <body>
-  <h1>Колесо Фортуны</h1>
+  <h1>Колесо</h1>
   <div class="wheel-container">
     <div class="arrow"></div>
-    <canvas id="wheel" class="wheel" width="400" height="400"></canvas>
+    <canvas id="wheel" class="wheel" width="300" height="300"></canvas>
   </div>
 
   <form id="sectorsForm" onsubmit="event.preventDefault(); updateSectors();">
@@ -74,12 +66,9 @@
     <br><button type="submit">Обновить</button>
   </form>
 
-  <div class="time-buttons">
-    <button onclick="spinWheel(5, 5)">Крутить 5 сек</button>
-    <button onclick="spinWheel(10, 8)">Крутить 10 сек</button>
-    <button onclick="spinWheel(30, 15)">Крутить 30 сек</button>
-    <button onclick="spinWheel(60, 25)">Крутить 1 мин</button>
-  </div>
+  <button onclick="spinWheel()">Крутить</button>
+
+  <audio id="rouletteSound" src="roulette.mp3" preload="auto"></audio>
 
   <script>
     const wheel = document.getElementById("wheel");
@@ -87,23 +76,24 @@
     const colors = ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40"];
     let currentAngle = 0;
     let sectors = [];
+    const rouletteSound = document.getElementById("rouletteSound");
 
     function drawWheel() {
-      ctx.clearRect(0, 0, 400, 400); // Учитываем новый размер
+      ctx.clearRect(0, 0, 300, 300);
       const anglePerSector = (2 * Math.PI) / sectors.length;
       for (let i = 0; i < sectors.length; i++) {
         ctx.beginPath();
-        ctx.moveTo(200, 200); // Учитываем новый размер
-        ctx.arc(200, 200, 200, i * anglePerSector, (i + 1) * anglePerSector); // Учитываем новый размер
+        ctx.moveTo(150, 150);
+        ctx.arc(150, 150, 150, i * anglePerSector, (i + 1) * anglePerSector);
         ctx.fillStyle = colors[i % colors.length];
         ctx.fill();
         ctx.save();
-        ctx.translate(200, 200); // Учитываем новый размер
+        ctx.translate(150, 150);
         ctx.rotate(i * anglePerSector + anglePerSector / 2);
         ctx.textAlign = "right";
         ctx.fillStyle = "#fff";
         ctx.font = "bold 16px sans-serif";
-        ctx.fillText(sectors[i], 190, 10); // Подгоняем позицию текста
+        ctx.fillText(sectors[i], 140, 10);
         ctx.restore();
       }
     }
@@ -114,18 +104,19 @@
       drawWheel();
     }
 
-    function spinWheel(duration, revolutions) { // duration в секундах, revolutions - количество оборотов
-      const spinAngle = 360 * revolutions + Math.floor(Math.random() * 360);  // Больше оборотов + случайный угол
+    function spinWheel() {
+      const spinAngle = Math.floor(Math.random() * 360 + 720);
       currentAngle += spinAngle;
 
-      wheel.style.transition = `transform ${duration}s cubic-bezier(0.33, 1, 0.68, 1)`; // Задаем время transition
+      rouletteSound.currentTime = 0;
+      rouletteSound.play();
 
       wheel.style.transform = `rotate(${currentAngle}deg)`;
 
-      // Сбрасываем transition после окончания вращения, чтобы следующие вращения работали корректно
       setTimeout(() => {
-        wheel.style.transition = '';
-      }, duration * 1000);
+          rouletteSound.pause();
+          rouletteSound.currentTime = 0;
+      }, 4000); // Время остановки звука должно совпадать со временем вращения колеса (4 сек)
     }
 
     updateSectors();
