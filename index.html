@@ -75,10 +75,10 @@
   </form>
 
   <div class="time-buttons">
-    <button onclick="spinWheel(5)">Крутить 5 сек</button>
-    <button onclick="spinWheel(10)">Крутить 10 сек</button>
-    <button onclick="spinWheel(30)">Крутить 30 сек</button>
-    <button onclick="spinWheel(60)">Крутить 1 мин</button>
+    <button onclick="spinWheel(5, 5)">Крутить 5 сек</button>
+    <button onclick="spinWheel(10, 8)">Крутить 10 сек</button>
+    <button onclick="spinWheel(30, 15)">Крутить 30 сек</button>
+    <button onclick="spinWheel(60, 25)">Крутить 1 мин</button>
   </div>
 
   <script>
@@ -114,8 +114,8 @@
       drawWheel();
     }
 
-    function spinWheel(duration) { // duration в секундах
-      const spinAngle = Math.floor(Math.random() * 360 + 720); // Произвольный угол вращения
+    function spinWheel(duration, revolutions) { // duration в секундах, revolutions - количество оборотов
+      const spinAngle = 360 * revolutions + Math.floor(Math.random() * 360);  // Больше оборотов + случайный угол
       currentAngle += spinAngle;
 
       wheel.style.transition = `transform ${duration}s cubic-bezier(0.33, 1, 0.68, 1)`; // Задаем время transition
